@@ -7,41 +7,56 @@ from scipy.fftpack import dct, idct
 import os
 
 # Parametry obrazu
-temp_steps = 17
-temp_step = 255 // temp_steps
+steps = 17
+step = 255 // steps
 width, height = 122, 10
 
-# Tworzenie obrazu tęczy
+# Tworzenie obrazu teczy
 image = np.zeros((height, width, 3), dtype=np.uint8)
 dummy = np.array([0, 0, 0], dtype=np.uint8)
 idx = 1
 
-for i in range(temp_steps):
-    dummy[2] += temp_step
+# Przejscia kolorow
+
+# Od czarnego do niebieskiego
+for i in range(steps):
+    dummy[0] += step  # B
     image[1:-1, idx] = dummy
     idx += 1
-for i in range(temp_steps):
-    dummy[1] += temp_step
+
+# Od niebieskiego do cyjanu (Zwiększaj G)
+for i in range(steps):
+    dummy[1] += step  # G
     image[1:-1, idx] = dummy
     idx += 1
-for i in range(temp_steps):
-    dummy[2] -= temp_step
+
+# Od cyjanu do zielonego (Zmniejszaj B)
+for i in range(steps):
+    dummy[0] -= step  # B
     image[1:-1, idx] = dummy
     idx += 1
-for i in range(temp_steps):
-    dummy[0] += temp_step
+
+# Od zielonego do zoltego (Zwiększaj R)
+for i in range(steps):
+    dummy[2] += step  # R
     image[1:-1, idx] = dummy
     idx += 1
-for i in range(temp_steps):
-    dummy[1] -= temp_step
+
+# Od zoltego do czerwonego (Zmniejszaj G)
+for i in range(steps):
+    dummy[1] -= step  # G
     image[1:-1, idx] = dummy
     idx += 1
-for i in range(temp_steps):
-    dummy[2] += temp_step
+
+# Od czerwonego do magenty (Zwiększaj B)
+for i in range(steps):
+    dummy[0] += step  # B
     image[1:-1, idx] = dummy
     idx += 1
-for i in range(temp_steps + 1):
-    dummy[1] = min(255, dummy[1] + temp_step)
+
+# Od magenty do bialego (Zwiększaj G)
+for i in range(steps + 1):
+    dummy[1] = min(255, dummy[1] + step)  # G
     image[1:-1, idx] = dummy
     idx += 1
 
@@ -63,10 +78,11 @@ Y = pad_image(Y)
 Cr = pad_image(Cr)
 Cb = pad_image(Cb)
 
-# Próbkowanie chrominancji
+# Probkowanie chrominancji
 sampling_factors = [1, 2, 4]
 
 for factor in sampling_factors:
+    # Zmniejszenie rozdzielczosci kanalow Cr i Cb
     Cr_sub = cv2.resize(Cr, (Cr.shape[1] // factor, Cr.shape[0] // factor), interpolation=cv2.INTER_AREA)
     Cb_sub = cv2.resize(Cb, (Cb.shape[1] // factor, Cb.shape[0] // factor), interpolation=cv2.INTER_AREA)
 
@@ -83,6 +99,7 @@ for factor in sampling_factors:
     h, w = Y.shape
     compressed_Y = np.zeros_like(Y, dtype=np.int32)
 
+    # Przeprowadzanie transformacji DCT i kwantyzacji dla bloku 8x8
     for i in range(0, h, 8):
         for j in range(0, w, 8):
             block = Y[i:i + 8, j:j + 8].astype(np.float32) - 128
@@ -90,7 +107,7 @@ for factor in sampling_factors:
             quantized = np.round(dct_block / QY)
             compressed_Y[i:i + 8, j:j + 8] = quantized
 
-    # Odtwarzanie
+    # Odtwarzanie obrazu po dekwantyzacji i odwrotnej DCT
     reconstructed_Y = np.zeros_like(compressed_Y, dtype=np.float32)
 
     for i in range(0, h, 8):
@@ -101,18 +118,25 @@ for factor in sampling_factors:
             reconstructed_Y[i:i + 8, j:j + 8] = idct_block
 
     Y_recon = np.clip(reconstructed_Y, 0, 255).astype(np.uint8)
+
+    # Przywrocenie pelnej rozdzielczosci chrominancji
     Cr_up = cv2.resize(Cr_sub, (w, h), interpolation=cv2.INTER_CUBIC)
     Cb_up = cv2.resize(Cb_sub, (w, h), interpolation=cv2.INTER_CUBIC)
 
+    # Skladanie koncowego obrazu
     reconstructed = cv2.merge((Y_recon, Cr_up, Cb_up))
     final_image = cv2.cvtColor(reconstructed, cv2.COLOR_YCrCb2BGR)
     final_image = final_image[:image.shape[0], :image.shape[1]]
 
+    # Zapis obrazu jako plik JPEG
     cv2.imwrite(f'jpeg_{factor}x.jpg', final_image, [cv2.IMWRITE_JPEG_QUALITY, 95])
     size = os.path.getsize(f'jpeg_{factor}x.jpg')
     print(f'Rozmiar dla próbkowania {factor}x: {size} bajtów')
 
+    # Wizualizacja porownania oryginalu i skompresowanego obrazu
     plt.figure(figsize=(10, 5))
     plt.subplot(121), plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), plt.title('Oryginał')
+    plt.axis('off')
     plt.subplot(122), plt.imshow(cv2.cvtColor(final_image, cv2.COLOR_BGR2RGB)), plt.title(f'Próbkowanie {factor}x')
+    plt.axis('off')
     plt.show()

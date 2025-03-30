@@ -9,12 +9,13 @@ steps = 17
 step = 255 // steps
 width, height = 122, 10
 
-# Tworzenie obrazu tęczy
+# Tworzenie obrazu teczy
 image = np.zeros((height, width, 3), dtype=np.uint8)
 dummy = np.array([0, 0, 0], dtype=np.uint8)
 idx = 1  # Start od pierwszej kolumny
 
-# Przejścia kolorów
+# Przejscia kolorow
+
 # Od czarnego do niebieskiego
 for i in range(steps):
     dummy[2] += step
@@ -33,13 +34,13 @@ for i in range(steps):
     image[1:-1, idx] = dummy
     idx += 1
 
-# Od zielonego do żółtego
+# Od zielonego do zoltego
 for i in range(steps):
     dummy[0] += step
     image[1:-1, idx] = dummy
     idx += 1
 
-# Od żółtego do czerwonego
+# Od zoltego do czerwonego
 for i in range(steps):
     dummy[1] -= step
     image[1:-1, idx] = dummy
@@ -51,18 +52,18 @@ for i in range(steps):
     image[1:-1, idx] = dummy
     idx += 1
 
-# Od magenty do białego
+# Od magenty do bialego
 for i in range(steps + 1):
     dummy[1] = min(255, dummy[1] + step)
     image[1:-1, idx] = dummy
     idx += 1
 
-# Przygotowanie danych obrazu dla PNG (każdy wiersz z filtrem 0)
+# Przygotowanie danych obrazu dla PNG (kazdy wiersz z filtrem 0)
 raw_data = b''.join(
     b'\x00' + image[row].tobytes() for row in range(height)
 )
 
-# Nagłówek PNG
+# Naglowek PNG
 png_signature = b'\x89PNG\r\n\x1a\n'
 
 # Budowa chunk'a IHDR
@@ -92,14 +93,14 @@ iend_chunk = (
 )
 
 # Zapis do pliku
-with open('lab4.png', 'wb') as f:
+with open('tecza.png', 'wb') as f:
     f.write(png_signature)
     f.write(ihdr_chunk)
     f.write(idat_chunk)
     f.write(iend_chunk)
 
 # Weryfikacja obrazu
-image_from_file = cv2.imread('lab4.png')
+image_from_file = cv2.imread('tecza.png')
 plt.imshow(cv2.cvtColor(image_from_file, cv2.COLOR_BGR2RGB))
 plt.axis('off')
 plt.show()
