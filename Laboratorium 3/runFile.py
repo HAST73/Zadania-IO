@@ -1,4 +1,3 @@
-from matplotlib import pyplot as plt
 import numpy as np
 import binascii
 import cv2 as cv
@@ -275,7 +274,7 @@ def Zadanie3_1():
         return message
 
     # Ustalenie sciezki do obrazu oraz wiadomosc, ktora chcemy ukryc
-    image_path = 'images/kosmos.jpg'
+    image_path = 'kosmos.jpg'
     original_image = load_image(image_path)
 
     # Wiadomosc do ukrycia
@@ -289,12 +288,12 @@ def Zadanie3_1():
     image_with_message = hide_message(original_image, binary_message, n)
 
     # Zapisanie obrazow w formatach PNG i JPG
-    save_image("images/image_with_message.png", image_with_message)
-    save_image("images/image_with_message.jpg", image_with_message)
+    save_image("image_with_message.png", image_with_message)
+    save_image("image_with_message.jpg", image_with_message)
 
     # Wczytanie obrazkow w formatach PNG i JPG
-    image_with_message_png = load_image("images/image_with_message.png")
-    image_with_message_jpg = load_image("images/image_with_message.jpg")
+    image_with_message_png = load_image("image_with_message.png")
+    image_with_message_jpg = load_image("image_with_message.jpg")
 
     # Odczytanie ukrytej wiadomosci z obrazkow
     secret_message_png = decode_from_binary_array(
@@ -423,7 +422,7 @@ def Zadanie3_2():
         return message
 
     # Wczytanie obrazu
-    original_image = load_image("images/kosmos.jpg")
+    original_image = load_image("kosmos.jpg")
     sizes = original_image.shape
     length = sizes[0] * sizes[1] * sizes[2]
 
@@ -550,7 +549,7 @@ def Zadanie3_3():
         return message
 
     # Wczytanie oryginalnego obrazu
-    original_image = load_image("images/kosmos.jpg", pad=True)
+    original_image = load_image("kosmos.jpg", pad=True)
 
     # Wiadomosc, ktora chcemy ukryc
     message = "Ukryta wiadomosc" * 1000
@@ -563,10 +562,10 @@ def Zadanie3_3():
     image_with_message = hide_message(original_image, binary, KodB, spos=1000000)
 
     # Zapis obrazu z ukryta wiadomoscia
-    save_image("images/pos_message.png", image_with_message)
+    save_image("pos_message.png", image_with_message)
 
     # Wczytanie z powrotem zapisanego obrazu
-    image_with_message = load_image("images/pos_message.png")
+    image_with_message = load_image("pos_message.png")
 
     # Odkrycie wiadomosci
     secret_message = decode_from_binary_array(
@@ -695,13 +694,13 @@ def Zadanie3_4():
             f.write(secret_bytes)
 
     # Zaladowanie obrazu bazowego
-    carrier_image = load_image("images/kosmos.jpg")
+    carrier_image = load_image("kosmos.jpg")
 
     # Zaladowanie obrazka, ktory chcemy ukryc
-    secret_image = open("images/star.jpg", "rb").read()
+    secret_image = open("star.jpg", "rb").read()
 
     # Ukrycie obrazka w obrazie
-    image_with_secret, secret_length = hide_image(carrier_image, "images/star.jpg", nbits=2)
+    image_with_secret, secret_length = hide_image(carrier_image, "star.jpg", nbits=2)
 
     # Odzyskanie ukrytego obrazka z pamieci
     secret_bits = reveal_message(image_with_secret, nbits=2, length=secret_length)
@@ -726,7 +725,7 @@ def Zadanie3_4():
     axs[0, 0].axis('off')
 
     # Oryginalny ukrywany obrazek
-    original_secret_img = Image.open("images/star.jpg")
+    original_secret_img = Image.open("star.jpg")
     original_secret_img = np.array(original_secret_img)
     axs[0, 1].imshow(original_secret_img)
     axs[0, 1].set_title("Image to hide star")
